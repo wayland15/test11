@@ -1,44 +1,152 @@
 <!doctype html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="utf-8">
-<title>1 Холл — VR</title>
-
-<link rel="stylesheet" href="pannellum.css">
-<script src="pannellum.js"></script>
-
-<style>
-html, body {
-  width:100%;
-  height:100%;
-  margin:0;
-  background:#000;
-}
-#panorama {
-  width:100%;
-  height:100%;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Квест-экскурсия — БГУИР</title>
+  <style>
+    /* Тот же красивый стиль, что был раньше */
+    :root{--bg:#0b0f14;--card:#0f1720;--accent:#6ee7b7;--muted:#9aa4b2}
+    html,body{height:100%;margin:0;font-family:Inter, Roboto, sans-serif;background:linear-gradient(180deg,#061018 0%, #0b1220 100%);color:#e6eef6}
+    .app{display:flex;height:100vh;gap:18px;padding:18px;box-sizing:border-box}
+    .sidebar{width:320px;background:rgba(255,255,255,0.03);border-radius:14px;padding:18px;overflow:auto}
+    h1{font-size:18px;margin:0 0 12px}
+    .hint{font-size:13px;color:var(--muted);margin-top:6px}
+    .building{margin-bottom:24px}
+    .building-title{font-weight:700;color:var(--accent);margin-bottom:10px}
+    .tabs{display:flex;flex-direction:column;gap:10px}
+    .tab{background:rgba(255,255,255,0.02);padding:14px;border-radius:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    .tab:hover{background:rgba(255,255,255,0.05)}
+    .tab button{background:transparent;border:1px solid rgba(255,255,255,0.1);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .tab button:hover{border-color:var(--accent);color:#fff}
+    .tab.visited{background:rgba(110,231,183,0.1);border:1px solid rgba(110,231,183,0.2)}
+    .main{flex:1;display:flex;flex-direction:column;gap:12px}
+    .viewer{flex:1;background:var(--card);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .viewer img{max-width:100%;max-height:100%;object-fit:contain}
+    .controls{display:flex;gap:10px}
+    .btn{background:var(--accent);border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;color:#000}
+    .btn.secondary{background:transparent;border:1px solid #444;color:#fff}
+    /* Модалка */
+    .modal-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:99}
+    .modal{background:#111;padding:30px;border-radius:15px;max-width:600px}
+  </style>
 </head>
-
 <body>
 
-<div id="panorama"></div>
+<div class="app">
+  <aside class="sidebar">
+    <h1>БГУИР — VR Квест</h1>
+    <div class="hint">Выбирай локации, открывай 360° туры, разгадывай загадки!</div>
+    <hr style="opacity:0.1;margin:15px 0">
+    <div id="tabsContainer"></div>
+  </aside>
+
+  <main class="main">
+    <div class="controls">
+      <button id="openInNewTab" class="btn">Открыть 360° тур (Новое окно)</button>
+      <button id="resetBtn" class="btn secondary">Сброс</button>
+      <div style="margin-left:auto;color:#777" id="currentInfo"></div>
+    </div>
+    <div class="viewer" id="viewer">
+      <div style="color:#555">Выберите локацию слева</div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h2 id="modalTitle">Загадка</h2>
+    <p id="modalText"></p>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn" id="solveBtn">Показать ответ</button>
+      <button class="btn secondary" id="closeModal">Закрыть</button>
+    </div>
+  </div>
+</div>
 
 <script>
-pannellum.viewer('panorama', {
-  type: 'cubemap',
-  autoLoad: true,
-  cubeMap: [
-    '1_Holl_Front.jpg',
-    '1_Holl_Right.jpg',
-    '1_Holl_Back.jpg',
-    '1_Holl_Left.jpg',
-    '1_Holl_Up.jpg',
-    '1_Holl_Down.jpg'
-  ]
-});
-</script>
+  // === НАСТРОЙКИ ЛОКАЦИЙ ===
+  // tourUrl: путь к твоему HTML файлу внутри папки
+  // photoUrl: путь к картинке для предпросмотра (можешь взять одну из панорамы, например Front)
+  const places = [
+    { 
+      id: 'hall', 
+      title: 'Главный холл', 
+      building: '2', 
+      tourUrl: 'hall/index.html',  // <-- ВАЖНО: Путь к твоему файлу панорамы
+      photoUrl: 'hall/1_Holl_Front.jpg', // Картинка для превью здесь
+      riddle: 'Зеленый пол, колонны в ряд. Куда студенты все спешат?', 
+      answer: 'Главный вход / Холл' 
+    },
+    // Добавь остальные
+    { 
+      id: 'library', 
+      title: 'Библиотека', 
+      building: '2', 
+      tourUrl: 'library/index.html', 
+      photoUrl: 'library/2_Lib_Front.jpg',
+      riddle: 'Тишина должна быть в библиотеке...', 
+      answer: 'Чшшш!' 
+    }
+  ];
 
+  // Основная логика (та же самая, только упрощенная)
+  const tabsContainer = document.getElementById('tabsContainer');
+  const viewer = document.getElementById('viewer');
+  const openBtn = document.getElementById('openInNewTab');
+  let currentPlace = null;
+  
+  let visited = JSON.parse(localStorage.getItem('bsuir_quest') || '{}');
+
+  function render() {
+    tabsContainer.innerHTML = '';
+    places.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'tab' + (visited[p.id] ? ' visited' : '');
+      el.innerHTML = `<span>${p.title}</span> <button class="checkBtn">✅</button>`;
+      
+      el.onclick = (e) => {
+        if(e.target.className === 'checkBtn') {
+           markVisited(p); 
+        } else {
+           selectPlace(p);
+        }
+      };
+      tabsContainer.appendChild(el);
+    });
+  }
+
+  function selectPlace(p) {
+    currentPlace = p;
+    document.getElementById('currentInfo').textContent = p.title;
+    // Показываем превью
+    viewer.innerHTML = `<img src="${p.photoUrl}" onerror="this.src='https://via.placeholder.com/600x400?text=Нет+фото'">`;
+  }
+
+  // ОТКРЫТИЕ ТУРА
+  openBtn.onclick = () => {
+    if(!currentPlace) return alert('Выберите место!');
+    // Просто открываем ссылку на твой html файл в новой вкладке
+    window.open(currentPlace.tourUrl, '_blank');
+  };
+
+  function markVisited(p) {
+    visited[p.id] = true;
+    localStorage.setItem('bsuir_quest', JSON.stringify(visited));
+    render();
+    // Показать загадку
+    document.getElementById('modalTitle').textContent = p.title;
+    document.getElementById('modalText').textContent = p.riddle;
+    document.getElementById('solveBtn').onclick = () => {
+       document.getElementById('modalText').innerHTML = p.riddle + '<br><br><b>' + p.answer + '</b>';
+    };
+    document.getElementById('modalBackdrop').style.display = 'flex';
+  }
+
+  document.getElementById('closeModal').onclick = () => document.getElementById('modalBackdrop').style.display = 'none';
+  document.getElementById('resetBtn').onclick = () => { localStorage.clear(); visited={}; render(); };
+
+  render();
+</script>
 </body>
 </html>
