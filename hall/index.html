@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>1 Холл — VR</title>
+
+<link rel="stylesheet" href="pannellum.css">
+<script src="pannellum.js"></script>
+
+<style>
+html, body {
+  width:100%;
+  height:100%;
+  margin:0;
+  background:#000;
+}
+#panorama {
+  width:100%;
+  height:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div id="panorama"></div>
+
+<script>
+pannellum.viewer('panorama', {
+  type: 'cubemap',
+  autoLoad: true,
+  cubeMap: [
+    '1_Holl_Front.jpg',
+    '1_Holl_Right.jpg',
+    '1_Holl_Back.jpg',
+    '1_Holl_Left.jpg',
+    '1_Holl_Up.jpg',
+    '1_Holl_Down.jpg'
+  ]
+});
+</script>
+
+</body>
+</html>
