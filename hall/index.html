@@ -1,8 +1,8 @@
 <!doctype html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>1 Холл — VR</title>
+<title>Главный холл — VR</title>
 
 <link rel="stylesheet" href="pannellum.css">
 <script src="pannellum.js"></script>
@@ -18,17 +18,95 @@ html, body {
   width:100%;
   height:100%;
 }
+
+/* ===== СТРЕЛКА ===== */
+.arrow {
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 50%;
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.2s;
+}
+.arrow:hover {
+  background: rgba(110,231,183,0.9);
+  color: #000;
+}
+
+/* ===== ЗАГАДКА ===== */
+#riddle {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+#riddleBox {
+  background: #111;
+  padding: 25px;
+  border-radius: 16px;
+  max-width: 420px;
+  text-align: center;
+  color: #fff;
+}
+#riddleBox button {
+  margin-top: 15px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #6ee7b7;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
+<!-- ===== ЗАГАДКА ===== -->
+<div id="riddle">
+  <div id="riddleBox">
+    <h2>Загадка</h2>
+    <p>
+      Здесь начинается путь каждого студента.<br>
+      Просторно, светло и всегда людно.<br>
+      Что это за место?
+    </p>
+    <button onclick="solve()">Ответ: Главный холл</button>
+  </div>
+</div>
+
 <div id="panorama"></div>
 
 <script>
+let nextArrow = null;
+
+/* ===== СОЗДАНИЕ СТРЕЛКИ ===== */
+function createArrow(hotSpotDiv, args) {
+  hotSpotDiv.className = 'arrow';
+  hotSpotDiv.innerHTML = '➡';
+  hotSpotDiv.style.display = 'none'; // СКРЫТА
+  hotSpotDiv.onclick = () => {
+    window.location.href = args.url;
+  };
+  nextArrow = hotSpotDiv;
+}
+
+/* ===== ЗАГАДКА РЕШЕНА ===== */
+function solve() {
+  document.getElementById('riddle').style.display = 'none';
+  if (nextArrow) nextArrow.style.display = 'block';
+}
+
+/* ===== PANNELLUM ===== */
 pannellum.viewer('panorama', {
   type: 'cubemap',
   autoLoad: true,
+
   cubeMap: [
     '1_Holl_Front.jpg',
     '1_Holl_Right.jpg',
@@ -36,10 +114,21 @@ pannellum.viewer('panorama', {
     '1_Holl_Left.jpg',
     '1_Holl_Up.jpg',
     '1_Holl_Down.jpg'
+  ],
+
+  hotSpots: [
+    {
+      pitch: -5,
+      yaw: 90,
+      type: 'custom',
+      createTooltipFunc: createArrow,
+      createTooltipArgs: {
+        url: '../room502/index.html'   // 👉 СЛЕДУЮЩАЯ ЛОКАЦИЯ
+      }
+    }
   ]
+});
 </script>
 
 </body>
-
 </html>
-
