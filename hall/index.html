@@ -36,32 +36,10 @@ pannellum.viewer('panorama', {
     '1_Holl_Left.jpg',
     '1_Holl_Up.jpg',
     '1_Holl_Down.jpg'
-  ],
-   hotSpots: [
-    {
-      pitch: -5,
-      yaw: 120,
-      type: 'custom',
-      cssClass: 'hotspot-link',
-      createTooltipFunc: hotspot,
-      createTooltipArgs: {
-        text: '➡ Перейти в столовую',
-        url: '../stolovaya/index.html'
-      }
-    }
   ]
-});
-
-function hotspot(hotSpotDiv, args) {
-  hotSpotDiv.classList.add('hotspot');
-  hotSpotDiv.innerHTML = args.text;
-  hotSpotDiv.onclick = () => {
-    window.location.href = args.url;
-  };
-});
-  
 </script>
 
 </body>
 
 </html>
+
