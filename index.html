@@ -1,221 +1,44 @@
 <!doctype html>
-<html lang="ru">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Квест-экскурсия — БГУИР (VR)</title>
-  <style>
-    :root{--bg:#0b0f14;--card:#0f1720;--accent:#6ee7b7;--muted:#9aa4b2}
-    html,body{height:100%;margin:0;font-family:Inter, Roboto, Arial, sans-serif;background:linear-gradient(180deg,#061018 0%, #0b1220 100%);color:#e6eef6}
-    .app{display:flex;height:100vh;gap:18px;padding:18px;box-sizing:border-box}
-    .sidebar{width:320px;min-width:220px;background:rgba(255,255,255,0.03);border-radius:14px;padding:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6);overflow:auto}
-    h1{font-size:18px;margin:0 0 12px}
-    .tabs{display:flex;flex-direction:column;gap:10px}
-    .tab{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
-    .tab .title{font-weight:600}
-    .tab .actions{display:flex;gap:8px}
-    .tab button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .tab.visited{outline:2px solid rgba(110,231,183,0.12)}
-    .main{flex:1;display:flex;flex-direction:column;gap:12px}
-    .viewer{flex:1;background:var(--card);border-radius:14px;overflow:hidden;position:relative}
-    iframe{width:100%;height:100%;border:0;background:#000}
-    .controls{display:flex;gap:10px;align-items:center}
-    .big{font-size:14px;padding:10px 14px}
-    .status{color:var(--muted);font-size:13px}
-    /* Modal */
-    .modal-backdrop{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(2,6,12,0.6);display:none;align-items:center;justify-content:center;z-index:60}
-    .modal{background:linear-gradient(180deg,#07131a,#0f2026);padding:18px;border-radius:12px;max-width:720px;width:92%;box-shadow:0 10px 40px rgba(2,6,23,0.8);}
-    .modal h2{margin:0 0 8px}
-    .modal p{margin:8px 0 0;color:#dceef3}
-    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-    .btn{background:var(--accent);border:none;padding:10px 14px;border-radius:10px;cursor:pointer;color:#042018;font-weight:700}
-    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
-    footer{color:var(--muted);font-size:13px;padding:6px 0}
-    /* VR hints */
-    .hint{font-size:13px;color:var(--muted);margin-top:6px}
-  </style>
+<meta charset="utf-8">
+<title>1 Холл — VR</title>
+
+<link rel="stylesheet" href="pannellum.css">
+<script src="pannellum.js"></script>
+
+<style>
+html, body {
+  width:100%;
+  height:100%;
+  margin:0;
+  background:#000;
+}
+#panorama {
+  width:100%;
+  height:100%;
+}
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <h1>Квест-экскурсия по БГУИР — VR</h1>
-      <div class="hint">Нажмите «Открыть тур» чтобы открыть виртуальную экскурсию в новой вкладке (лучше всего для VR-окулов). После посещения объекта нажмите "Я посетил" — появится загадка.</div>
-      <hr style="opacity:0.06;margin:12px 0">
-      <div class="tabs" id="tabsContainer">
-        <!-- Tabs будут сгенерированы скриптом -->
-      </div>
-      <footer>Прогресс: <span id="progress">0 / 0</span></footer>
-    </aside>
 
-    <main class="main">
-      <div class="controls">
-        <button id="openInNewTab" class="big btn">Открыть текущий тур в новой вкладке</button>
-        <button id="resetBtn" class="big btn secondary">Сбросить прогресс</button>
-        <div style="flex:1"></div>
-        <div class="status" id="currentPlace">Выберите объект слева</div>
-      </div>
+<div id="panorama"></div>
 
-      <div class="viewer" id="viewer">
-        <iframe id="tourFrame" srcdoc="<p style='color:#fff;padding:20px;font-family:Arial'>Выберите объект слева чтобы загрузить предварительный просмотр экскурсии. Для полноценного VR нажмите «Открыть тур».</p>"></iframe>
-      </div>
-    </main>
-  </div>
+<script>
+pannellum.viewer('panorama', {
+  type: 'cubemap',
+  autoLoad: true,
+  cubeMap: [
+    '1_Holl_Front.jpg',
+    '1_Holl_Right.jpg',
+    '1_Holl_Back.jpg',
+    '1_Holl_Left.jpg',
+    '1_Holl_Up.jpg',
+    '1_Holl_Down.jpg'
+  ]
+});
+</script>
 
-  <!-- Modal for riddles -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal" role="dialog" aria-modal="true">
-      <h2 id="modalTitle">Загадка</h2>
-      <p id="modalText"></p>
-      <div class="actions">
-        <button class="btn" id="solveBtn">Показать ответ</button>
-        <button class="btn secondary" id="closeModal">Закрыть</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Настройка объектов тура — замените поля "tourUrl" на реальные ссылки виртуальных туров БГУИР
-    const places = [
-      { id: 'hall', title: 'Главный холл', tourUrl: 'https://www.bsuir.by/ru/virtualnaya-ekskursiya-2-korpus', locked: false,
-        riddle: 'Я место первое встречаю, двери в корпус открываю. Что я?', answer: 'Главный холл' },
-      { id: 'library', title: 'Библиотека', tourUrl: 'https://www.bsuir.by/ru/virtualnaya-ekskursiya-2-korpus', locked: true,
-        riddle: 'Тишина вокруг царит, каждый здесь умней спешит. Что это за место?', answer: 'Библиотека' },
-      { id: 'sports', title: 'Спортзал', tourUrl: 'https://www.bsuir.by/ru/virtualnaya-ekskursiya-2-korpus', locked: true,
-        riddle: 'Где мяч летает и крепнут мышцы?', answer: 'Спортзал' },
-      { id: 'canteen', title: 'Столовая', tourUrl: 'https://www.bsuir.by/ru/virtualnaya-ekskursiya-2-korpus', locked: true,
-        riddle: 'Где студенты силы пополняют?', answer: 'Столовая' }
-    ];
-
-    const tabsContainer = document.getElementById('tabsContainer');
-    const tourFrame = document.getElementById('tourFrame');
-    const openBtn = document.getElementById('openInNewTab');
-    const progressEl = document.getElementById('progress');
-    const currentPlace = document.getElementById('currentPlace');
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalText = document.getElementById('modalText');
-    const solveBtn = document.getElementById('solveBtn');
-    const closeModal = document.getElementById('closeModal');
-    const resetBtn = document.getElementById('resetBtn');
-
-    // Прогресс в localStorage
-    const STORAGE_KEY = 'bsuir_vr_quest_visited';
-    let visited = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-
-    function renderTabs(){
-      tabsContainer.innerHTML = '';
-      places.forEach((p, idx) =>{
-        const div = document.createElement('div');
-        div.className = 'tab' + (visited[p.id] ? ' visited' : '');
-        div.dataset.index = idx;
-        div.innerHTML = `<div style=\"display:flex;flex-direction:column;gap:4px\"><div class=\"title\">${p.title}</div><div class=\"hint\" style=\"font-size:12px;color:var(--muted)\">Клик — загрузить предпросмотр</div></div>
-          <div class=\"actions\"> 
-            <button class=\"previewBtn\">Предпросмотр</button>
-            <button class=\"openBtn\">Открыть тур</button>
-            <button class=\"markBtn\">Я посетил</button>
-          </div>`;
-
-        tabsContainer.appendChild(div);
-      });
-      updateProgress();
-      attachTabListeners();
-    }
-
-    function attachTabListeners(){
-      document.querySelectorAll('.tab').forEach(node=>{
-        const idx = +node.dataset.index;
-        const place = places[idx];
-        node.querySelector('.previewBtn').addEventListener('click', ()=>{
-          loadPreview(place);
-        });
-        node.querySelector('.openBtn').addEventListener('click', ()=>{
-          openTour(place);
-        });
-        node.querySelector('.markBtn').addEventListener('click', ()=>{
-          markVisited(place);
-        });
-      });
-    }
-
-    function loadPreview(place){
-      currentPlace.textContent = `Предпросмотр: ${place.title}`;
-      // Если есть previewUrl, загрузим его, иначе загрузим информационную карту
-      if(place.previewUrl){
-        tourFrame.src = place.previewUrl;
-      } else {
-        // простая встраиваемая страница с кнопкой для открытия настоящего тура
-        const html = `<html><body style='background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:Arial'><div style='text-align:center'><h2>${place.title}</h2><p style='opacity:0.8'>Предпросмотр этой точки.</p><p><a href=\"${place.tourUrl}\" target=\"_blank\" style=\"color:#9ae6b4\">Открыть полный тур в новой вкладке</a></p></div></body></html>`;
-        tourFrame.srcdoc = html;
-      }
-    }
-
-    function openTour(place){
-      // Открывает настоящий виртуальный тур в новой вкладке — это рекомендуется для VR-шлемов
-      if(!place.tourUrl){
-        alert('Ссылка на виртуальный тур не задана для этого объекта.');
-        return;
-      }
-      window.open(place.tourUrl, '_blank');
-    }
-
-    openBtn.addEventListener('click', ()=>{
-      // Если сейчас выбран какой-то объект — откроем его. Иначе откроем первую ссылку.
-      const current = getCurrentPlace();
-      const place = current ? current : places[0];
-      openTour(place);
-    });
-
-    function getCurrentPlace(){
-      const text = currentPlace.textContent || '';
-      const match = places.find(p => text.includes(p.title));
-      return match || null;
-    }
-
-    function markVisited(place){
-      if(visited[place.id]){
-        // если уже посещён — можно показать загадку снова
-        showRiddle(place);
-        return;
-      }
-      visited[place.id] = true;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(visited));
-      renderTabs();
-      showRiddle(place);
-    }
-
-    function showRiddle(place){
-      modalTitle.textContent = `Загадка — ${place.title}`;
-      modalText.textContent = place.riddle;
-      solveBtn.onclick = ()=>{ modalText.textContent = place.riddle + '\n\nОтвет: ' + place.answer; };
-      modalBackdrop.style.display = 'flex';
-    }
-
-    closeModal.addEventListener('click', ()=>{ modalBackdrop.style.display = 'none'; });
-    modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) modalBackdrop.style.display = 'none'; });
-
-    function updateProgress(){
-      const total = places.length;
-      const done = Object.keys(visited).filter(k=>visited[k]).length;
-      progressEl.textContent = `${done} / ${total}`;
-    }
-
-    resetBtn.addEventListener('click', ()=>{
-      if(confirm('Сбросить весь прогресс?')){
-        visited = {};
-        localStorage.removeItem(STORAGE_KEY);
-        renderTabs();
-        tourFrame.srcdoc = '<p style="color:#fff;padding:20px;font-family:Arial">Выберите объект слева чтобы загрузить предпросмотр экскурсии. Для полноценного VR нажмите «Открыть тур».</p>';
-        currentPlace.textContent = 'Выберите объект слева';
-      }
-    });
-
-    // Инициализация
-    renderTabs();
-
-    // Удобства для VR: большие элементы, можно управлять через контроллеры, а также открывать туры в новой вкладке.
-    // Если нужно — могу встроить WebXR-ориентированные ссылки или сделать полноценный 360° встраиваемый плеер (требует реальные ссылки на панорамы).
-
-    // Подсказка разработчику: замените поля places[].tourUrl на действительные URL виртуальных туров БГУИР.
-  </script>
 </body>
 </html>
