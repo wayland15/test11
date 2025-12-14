@@ -128,9 +128,22 @@ window.viewer = pannellum.viewer('panorama', {
     }
   ]
 });
+
+  
+function hotspotArrow(hotSpotDiv, args) {
+  hotSpotDiv.classList.add('custom-hotspot');
+
+  const img = document.createElement('img');
+  img.src = 'arrow.png';
+  img.style.width = '60px';
+  img.style.cursor = 'pointer';
+
+  hotSpotDiv.appendChild(img);
+}
 </script>
 
 </body>
 </html>
+
 
 
