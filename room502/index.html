@@ -1,48 +1,75 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <title>Room 502 — 360° VR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<title>Аудитория 502 — VR</title>
 
-  <link rel="stylesheet" href="pannellum.css">
-  <script src="pannellum.js"></script>
+<link rel="stylesheet" href="pannellum.css">
+<script src="pannellum.js"></script>
 
-  <style>
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      background: black;
-      overflow: hidden;
-    }
-    #panorama {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+<style>
+html, body { margin:0; width:100%; height:100%; background:black; }
+#panorama { width:100%; height:100%; }
+#riddle {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.9);
+  display:flex; align-items:center; justify-content:center;
+  z-index:999;
+}
+#box { background:#1f1f1f; color:white; padding:30px; border-radius:16px; }
+</style>
 </head>
+
 <body>
+
+<div id="riddle">
+  <div id="box">
+    <h2>Вопрос</h2>
+    <p>Здесь проходят лекции и занятия.<br>Что это?</p>
+    <button onclick="solve()">Аудитория</button>
+  </div>
+</div>
 
 <div id="panorama"></div>
 
 <script>
-  pannellum.viewer('panorama', {
-    type: 'cubemap',
-    autoLoad: true,
-    showControls: true,
-    autoRotate: -2,
-    autoRotateInactivityDelay: 3000,
+let arrow;
 
-    cubeMap: [
-      'Room_502_Front.jpg',
-      'Room_502_Right.jpg',
-      'Room_502_Back.jpg',
-      'Room_502_Left.jpg',
-      'Room_502_Up.jpg',
-      'Room_502_Down.jpg'
-    ]
-  });
+pannellum.viewer('panorama', {
+  type: 'cubemap',
+  autoLoad: true,
+
+  cubeMap: [
+    'Room_502_Front.jpg',
+    'Room_502_Right.jpg',
+    'Room_502_Back.jpg',
+    'Room_502_Left.jpg',
+    'Room_502_Up.jpg',
+    'Room_502_Down.jpg'
+  ],
+
+  hotSpots: [
+    {
+      pitch: 0,
+      yaw: 120,
+      type: 'custom',
+      createTooltipFunc: function(div) {
+        arrow = div;
+        div.style.display = 'none';
+        const img = document.createElement('img');
+        img.src = '../arrow.png';
+        img.style.width = '60px';
+        img.onclick = () => location.href = '../stolovaya/index.html';
+        div.appendChild(img);
+      }
+    }
+  ]
+});
+
+function solve() {
+  document.getElementById('riddle').style.display = 'none';
+  arrow.style.display = 'block';
+}
 </script>
 
 </body>
