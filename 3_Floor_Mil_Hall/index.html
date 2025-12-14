@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>3 Floor Mil Hall — 360° VR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="pannellum.css">
+  <script src="pannellum.js"></script>
+
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+    #panorama {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div id="panorama"></div>
+
+<script>
+  pannellum.viewer('panorama', {
+    type: 'cubemap',
+    autoLoad: true,
+    showControls: true,
+    autoRotate: -2,
+    autoRotateInactivityDelay: 3000,
+    
+    /* 
+      Порядок файлов строго определен:
+      1. Перед (Front)
+      2. Право (Right)
+      3. Зад (Back)
+      4. Лево (Left)
+      5. Верх (Up)
+      6. Низ (Down)
+    */
+    cubeMap: [
+      '3_Floor_Mil_Hall_Front.jpg',
+      '3_Floor_Mil_Hall_Right.jpg',
+      '3_Floor_Mil_Hall_Back.jpg',
+      '3_Floor_Mil_Hall_Left.jpg',
+      '3_Floor_Mil_Hall_Up.jpg',
+      '3_Floor_Mil_Hall_Down.jpg'
+    ]
+  });
+</script>
+
+</body>
+</html>
