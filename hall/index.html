@@ -164,27 +164,72 @@ window.viewer = pannellum.viewer('panorama', {
   ]
 });
 
-  <script>
-  // ID этой локации (должен совпадать с тем, что в main файле в buildings -> quests)
-  const locationId = 'hall'; 
+<script>
+let nextArrow = null;
 
-  // 1. Получаем текущий прогресс
-  let progress = JSON.parse(localStorage.getItem('bsuir_quest_progress') || '{}');
+function createArrow(hotSpotDiv, args) {
+  hotSpotDiv.classList.add('custom-arrow-container');
+  hotSpotDiv.style.display = 'none';
+  nextArrow = hotSpotDiv;
 
-  // 2. Если еще не были здесь - отмечаем
-  if (!progress[locationId]) {
-    progress[locationId] = true;
-    localStorage.setItem('bsuir_quest_progress', JSON.stringify(progress));
-    
-    // 3. Посылаем сигнал главной вкладке, чтобы она обновилась
-    localStorage.setItem('bsuir_quest_update', Date.now()); 
-    
-    // Опционально: Показать уведомление внутри тура
-    alert("Квест: Локация найдена! (Библиотека)");
-  }
+  const img = document.createElement('img');
+  img.src = 'arrow.png';
+  img.style.width = '100%';
+  img.style.cursor = 'pointer';
+
+  img.onclick = () => {
+    window.location.href = args.url;
+  };
+
+  hotSpotDiv.appendChild(img);
+}
+
+function solve() {
+  const riddle = document.getElementById('riddle');
+  riddle.style.opacity = '0';
+  setTimeout(() => riddle.style.display = 'none', 300);
+
+  if (nextArrow) nextArrow.style.display = 'block';
+}
+
+window.viewer = pannellum.viewer('panorama', {
+  type: 'cubemap',
+  autoLoad: true,
+  cubeMap: [
+    '1_Holl_Front.jpg',
+    '1_Holl_Right.jpg',
+    '1_Holl_Back.jpg',
+    '1_Holl_Left.jpg',
+    '1_Holl_Up.jpg',
+    '1_Holl_Down.jpg'
+  ],
+  hotSpots: [
+    {
+      pitch: 1.02,
+      yaw: 131.96,
+      type: 'custom',
+      createTooltipFunc: createArrow,
+      createTooltipArgs: {
+        url: '../room502/index.html'
+      }
+    }
+  ]
+});
 </script>
+
+<script>
+const locationId = 'hall';
+
+let progress = JSON.parse(localStorage.getItem('bsuir_quest_progress') || '{}');
+
+if (!progress[locationId]) {
+  progress[locationId] = true;
+  localStorage.setItem('bsuir_quest_progress', JSON.stringify(progress));
+  localStorage.setItem('bsuir_quest_update', Date.now());
+}
 </script>
 
 </body>
 </html>
+
 
