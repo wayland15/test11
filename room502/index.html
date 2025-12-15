@@ -3,10 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>Аудитория 502 — VR</title>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-
 <style>
 html, body {
   margin: 0;
@@ -15,13 +13,11 @@ html, body {
   background: #000;
   font-family: sans-serif;
 }
-
 #panorama {
   width: 100%;
   height: 100%;
 }
-
-/* ===== ОВЕРЛЕЙ ЗАГАДКИ ===== */
+/* Оверлей загадки */
 #riddle {
   position: fixed;
   inset: 0;
@@ -31,7 +27,6 @@ html, body {
   justify-content: center;
   z-index: 999;
 }
-
 #box {
   background: #1f1f1f;
   color: #fff;
@@ -41,18 +36,14 @@ html, body {
   text-align: center;
   box-shadow: 0 0 30px rgba(110,231,183,0.25);
 }
-
 #box h2 {
   margin-top: 0;
   color: #6ee7b7;
 }
-
 #box p {
   line-height: 1.6;
   color: #ddd;
 }
-
-/* ===== КНОПКА ===== */
 #box button {
   margin-top: 16px;
   padding: 12px 22px;
@@ -65,12 +56,10 @@ html, body {
   cursor: pointer;
   transition: 0.2s;
 }
-
 #box button:hover {
   background: #fff;
 }
-
-/* ===== ВИДЕО ПОСЛЕ ЗАГАДКИ ===== */
+/* Видео */
 #introVideo {
   position: fixed;
   inset: 0;
@@ -81,18 +70,14 @@ html, body {
   display: none;
   z-index: 998;
 }
-
-/* ===== СТРЕЛКА ===== */
 .custom-arrow {
   width: 60px;
   height: 60px;
 }
 </style>
 </head>
-
 <body>
 
-<!-- ===== ОВЕРЛЕЙ С ВОПРОСОМ ===== -->
 <div id="riddle">
   <div id="box">
     <h2>Загадка</h2>
@@ -105,23 +90,21 @@ html, body {
   </div>
 </div>
 
-<!-- ===== ВИДЕО (ЗАПУСКАЕТСЯ ПОСЛЕ ЗАГАДКИ) ===== -->
+<!-- Видео со звуком, проигрывается один раз -->
 <video id="introVideo" playsinline preload="auto">
   <source src="intro.mp4" type="video/mp4">
+  Ваш браузер не поддерживает видео.
 </video>
 
 <div id="panorama"></div>
 
 <script>
-// ===================================================
-// 1. PANELLUM
-// ===================================================
 let arrow = null;
 
+// Инициализация панорамы
 pannellum.viewer('panorama', {
   type: 'cubemap',
   autoLoad: true,
-
   cubeMap: [
     'Room_502_Front.jpg',
     'Room_502_Right.jpg',
@@ -130,7 +113,6 @@ pannellum.viewer('panorama', {
     'Room_502_Up.jpg',
     'Room_502_Down.jpg'
   ],
-
   hotSpots: [
     {
       pitch: 0,
@@ -140,49 +122,66 @@ pannellum.viewer('panorama', {
         arrow = div;
         div.classList.add('custom-arrow');
         div.style.display = 'none';
-
         const img = document.createElement('img');
         img.src = 'arrow.png';
         img.style.width = '100%';
         img.style.cursor = 'pointer';
         img.style.transition = 'transform 0.2s';
-
         img.onmouseover = () => img.style.transform = 'scale(1.1)';
-        img.onmouseout  = () => img.style.transform = 'scale(1)';
-
+        img.onmouseout = () => img.style.transform = 'scale(1)';
         img.onclick = () => {
           window.location.href = '../stolovaya/index.html';
         };
-
         div.appendChild(img);
       }
     }
   ]
 });
 
-// ===================================================
-// 2. РЕШЕНИЕ ЗАГАДКИ + ВИДЕО
-// ===================================================
+// Основная функция решения загадки
 function solve() {
   document.getElementById('riddle').style.display = 'none';
 
   const video = document.getElementById('introVideo');
   video.style.display = 'block';
 
+  // Важно: убираем muted только после действия пользователя
   video.muted = false;
+
+  // Сбрасываем на начало и играем
   video.currentTime = 0;
 
-  video.play();
+  // Обрабатываем возможную ошибку (если браузер всё равно блокирует звук)
+  const playPromise = video.play();
 
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        console.log("Видео успешно запущено со звуком");
+      })
+      .catch(error => {
+        console.warn("Автопроигрывание заблокировано:", error);
+        // Если не удалось со звуком — можно попробовать без звука как fallback
+        video.muted = true;
+        video.play();
+      });
+  }
+
+  // Когда видео закончится — скрываем его и показываем стрелку
   video.onended = () => {
-    video.pause();
     video.style.display = 'none';
-
-    if (arrow) arrow.style.display = 'block';
+    if (arrow) {
+      arrow.style.display = 'block';
+    }
   };
+
+  // На всякий случай: если видео уже закончилось (кэш), сразу показываем стрелку
+  if (video.ended) {
+    video.style.display = 'none';
+    if (arrow) arrow.style.display = 'block';
+  }
 }
 </script>
 
 </body>
 </html>
-
