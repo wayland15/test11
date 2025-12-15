@@ -145,18 +145,11 @@ function solve() {
   const video = document.getElementById('introVideo');
   video.style.display = 'block';
 
-  // КРИТИЧЕСКИ ВАЖНО
-  video.muted = true;
+  video.muted = true;        // ОБЯЗАТЕЛЬНО
   video.currentTime = 0;
-  video.load();
 
-  video.play().then(() => {
-    // Через небольшой таймаут включаем звук
-    setTimeout(() => {
-      video.muted = false;
-    }, 300);
-  }).catch(err => {
-    console.error("Видео не запустилось:", err);
+  video.play().catch(err => {
+    console.error('Видео заблокировано браузером', err);
   });
 
   video.onended = () => {
@@ -168,4 +161,5 @@ function solve() {
 
 </body>
 </html>
+
 
