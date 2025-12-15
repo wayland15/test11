@@ -163,7 +163,28 @@ window.viewer = pannellum.viewer('panorama', {
     }
   ]
 });
+
+  <script>
+  // ID этой локации (должен совпадать с тем, что в main файле в buildings -> quests)
+  const locationId = 'hall'; 
+
+  // 1. Получаем текущий прогресс
+  let progress = JSON.parse(localStorage.getItem('bsuir_quest_progress') || '{}');
+
+  // 2. Если еще не были здесь - отмечаем
+  if (!progress[locationId]) {
+    progress[locationId] = true;
+    localStorage.setItem('bsuir_quest_progress', JSON.stringify(progress));
+    
+    // 3. Посылаем сигнал главной вкладке, чтобы она обновилась
+    localStorage.setItem('bsuir_quest_update', Date.now()); 
+    
+    // Опционально: Показать уведомление внутри тура
+    alert("Квест: Локация найдена! (Библиотека)");
+  }
+</script>
 </script>
 
 </body>
 </html>
+
