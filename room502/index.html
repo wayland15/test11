@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <title>Аудитория 502 — VR</title>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
 <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
 <style>
 html, body {
   margin: 0;
@@ -17,7 +19,8 @@ html, body {
   width: 100%;
   height: 100%;
 }
-/* Оверлей загадки */
+
+/* ===== ОВЕРЛЕЙ ВОПРОСА ===== */
 #riddle {
   position: fixed;
   inset: 0;
@@ -28,7 +31,7 @@ html, body {
   z-index: 999;
 }
 #box {
-  background: #1f1f1f;
+  background: #111;
   color: #fff;
   padding: 28px;
   border-radius: 18px;
@@ -44,6 +47,15 @@ html, body {
   line-height: 1.6;
   color: #ddd;
 }
+
+/* ===== ВИДЕО ===== */
+#box video {
+  width: 100%;
+  border-radius: 12px;
+  margin: 12px 0;
+}
+
+/* ===== КНОПКА ===== */
 #box button {
   margin-top: 16px;
   padding: 12px 22px;
@@ -59,52 +71,44 @@ html, body {
 #box button:hover {
   background: #fff;
 }
-/* Видео */
-#introVideo {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000;
-  display: none;
-  z-index: 998;
-}
+
+/* ===== СТРЕЛКА ===== */
 .custom-arrow {
   width: 60px;
   height: 60px;
 }
 </style>
 </head>
+
 <body>
 
+<!-- ===== ВОПРОС + ВИДЕО ===== -->
 <div id="riddle">
   <div id="box">
-    <h2>Загадка</h2>
+    <h2>Вопрос</h2>
+
+    <video src="intro.mp4" autoplay muted loop playsinline></video>
+
     <p>
       Здесь проходят лекции,<br>
       практические занятия и экзамены.<br>
       Что это за место?
     </p>
+
     <button onclick="solve()">Ответ: Аудитория</button>
   </div>
 </div>
-
-<!-- Видео со звуком, проигрывается один раз -->
-<video id="introVideo" playsinline preload="auto">
-  <source src="intro.mp4" type="video/mp4">
-  Ваш браузер не поддерживает видео.
-</video>
 
 <div id="panorama"></div>
 
 <script>
 let arrow = null;
 
-// Инициализация панорамы
+/* ===== PANELLUM ===== */
 pannellum.viewer('panorama', {
   type: 'cubemap',
   autoLoad: true,
+
   cubeMap: [
     'Room_502_Front.jpg',
     'Room_502_Right.jpg',
@@ -113,6 +117,7 @@ pannellum.viewer('panorama', {
     'Room_502_Up.jpg',
     'Room_502_Down.jpg'
   ],
+
   hotSpots: [
     {
       pitch: 0,
@@ -122,44 +127,28 @@ pannellum.viewer('panorama', {
         arrow = div;
         div.classList.add('custom-arrow');
         div.style.display = 'none';
+
         const img = document.createElement('img');
-        img.src = 'arrow.png';
+        img.src = '../arrow.png';
         img.style.width = '100%';
         img.style.cursor = 'pointer';
-        img.style.transition = 'transform 0.2s';
-        img.onmouseover = () => img.style.transform = 'scale(1.1)';
-        img.onmouseout = () => img.style.transform = 'scale(1)';
+
         img.onclick = () => {
           window.location.href = '../stolovaya/index.html';
         };
+
         div.appendChild(img);
       }
     }
   ]
 });
 
-// Основная функция решения загадки
+/* ===== РЕШЕНИЕ ===== */
 function solve() {
   document.getElementById('riddle').style.display = 'none';
-
-  const video = document.getElementById('introVideo');
-  video.style.display = 'block';
-
-  video.muted = true;        // ОБЯЗАТЕЛЬНО
-  video.currentTime = 0;
-
-  video.play().catch(err => {
-    console.error('Видео заблокировано браузером', err);
-  });
-
-  video.onended = () => {
-    video.style.display = 'none';
-    if (arrow) arrow.style.display = 'block';
-  };
+  if (arrow) arrow.style.display = 'block';
 }
 </script>
 
 </body>
 </html>
-
-
