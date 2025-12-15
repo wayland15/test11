@@ -145,43 +145,27 @@ function solve() {
   const video = document.getElementById('introVideo');
   video.style.display = 'block';
 
-  // Важно: убираем muted только после действия пользователя
-  video.muted = false;
-
-  // Сбрасываем на начало и играем
+  // КРИТИЧЕСКИ ВАЖНО
+  video.muted = true;
   video.currentTime = 0;
+  video.load();
 
-  // Обрабатываем возможную ошибку (если браузер всё равно блокирует звук)
-  const playPromise = video.play();
+  video.play().then(() => {
+    // Через небольшой таймаут включаем звук
+    setTimeout(() => {
+      video.muted = false;
+    }, 300);
+  }).catch(err => {
+    console.error("Видео не запустилось:", err);
+  });
 
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        console.log("Видео успешно запущено со звуком");
-      })
-      .catch(error => {
-        console.warn("Автопроигрывание заблокировано:", error);
-        // Если не удалось со звуком — можно попробовать без звука как fallback
-        video.muted = true;
-        video.play();
-      });
-  }
-
-  // Когда видео закончится — скрываем его и показываем стрелку
   video.onended = () => {
     video.style.display = 'none';
-    if (arrow) {
-      arrow.style.display = 'block';
-    }
-  };
-
-  // На всякий случай: если видео уже закончилось (кэш), сразу показываем стрелку
-  if (video.ended) {
-    video.style.display = 'none';
     if (arrow) arrow.style.display = 'block';
-  }
+  };
 }
 </script>
 
 </body>
 </html>
+
