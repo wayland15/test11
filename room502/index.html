@@ -106,8 +106,8 @@ html, body {
 </div>
 
 <!-- ===== ВИДЕО (ЗАПУСКАЕТСЯ ПОСЛЕ ЗАГАДКИ) ===== -->
-<video id="introVideo" muted playsinline>
-<source src="lection.mp4" type="video/mp4">
+<video id="introVideo" playsinline preload="auto">
+  <source src="intro.mp4" type="video/mp4">
 </video>
 
 <div id="panorama"></div>
@@ -168,19 +168,21 @@ function solve() {
 
   const video = document.getElementById('introVideo');
   video.style.display = 'block';
+
+  video.muted = false;
+  video.currentTime = 0;
+
   video.play();
 
-  // 👉 ПОСЛЕ ОКОНЧАНИЯ ВИДЕО
   video.onended = () => {
+    video.pause();
     video.style.display = 'none';
+
     if (arrow) arrow.style.display = 'block';
   };
-
-  // 👉 ЕСЛИ ХОЧЕШЬ ПОКАЗЫВАТЬ СТРЕЛКУ СРАЗУ,
-  // просто раскомментируй:
-  // if (arrow) arrow.style.display = 'block';
 }
 </script>
 
 </body>
 </html>
+
