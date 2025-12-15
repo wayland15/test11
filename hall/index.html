@@ -95,14 +95,18 @@ html, body {
 <div id="panorama"></div>
 
 <script>
-// ===================================================
-// 1. УЧЁТ ПОСЕЩЕНИЙ ХОЛЛА
-// ===================================================
 const visitKey = 'bsuir_hall_visits';
 let visits = parseInt(localStorage.getItem(visitKey) || '0', 10);
 visits++;
 localStorage.setItem(visitKey, visits);
 
+// Максимальное достигнутое количество посещений (для разблокировки стрелок навсегда)
+const maxVisitsKey = 'bsuir_hall_max_visits';
+let maxVisits = parseInt(localStorage.getItem(maxVisitsKey) || '1', 10); // минимум 1, т.к. первый визит всегда
+if (visits > maxVisits) {
+  maxVisits = visits;
+  localStorage.setItem(maxVisitsKey, maxVisits);
+}
 // ===================================================
 // 2. КВЕСТ (АВТОГАЛОЧКА)
 // ===================================================
@@ -201,13 +205,14 @@ pannellum.viewer('panorama', {
 // 4. РЕШЕНИЕ ЗАГАДКИ
 // ===================================================
 function solve() {
-  document.getElementById('riddle').style.display = 'none';
+document.getElementById('riddle').style.display = 'none';
 
-  if (visits === 1 && arrow1) {
+  // Показываем стрелки на основе МАКСИМАЛЬНОГО достигнутого количества посещений
+  if (maxVisits >= 1 && arrow1) {
     arrow1.style.display = 'block';
   }
 
-  if (visits >= 2 && arrow2) {
+  if (maxVisits >= 2 && arrow2) {
     arrow2.style.display = 'block';
   }
 }
@@ -215,3 +220,4 @@ function solve() {
 
 </body>
 </html>
+
