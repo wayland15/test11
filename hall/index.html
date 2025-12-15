@@ -15,6 +15,7 @@ html, body {
   background: #000;
   font-family: sans-serif;
 }
+
 #panorama {
   width: 100%;
   height: 100%;
@@ -30,8 +31,9 @@ html, body {
   justify-content: center;
   z-index: 999;
 }
+
 #box {
-  background: #1f1f1f; /* Темный фон как в вашем стиле */
+  background: #1f1f1f;
   color: #fff;
   padding: 28px;
   border-radius: 18px;
@@ -39,10 +41,12 @@ html, body {
   text-align: center;
   box-shadow: 0 0 30px rgba(110,231,183,0.25);
 }
+
 #box h2 {
   margin-top: 0;
   color: #6ee7b7;
 }
+
 #box p {
   line-height: 1.6;
   color: #ddd;
@@ -61,11 +65,12 @@ html, body {
   cursor: pointer;
   transition: 0.2s;
 }
+
 #box button:hover {
   background: #fff;
 }
 
-/* ===== СТРЕЛКА ===== */
+/* ===== СТРЕЛКИ ===== */
 .custom-arrow {
   width: 60px;
   height: 60px;
@@ -83,7 +88,6 @@ html, body {
       Просторно, светло и всегда людно.<br>
       Что это за место?
     </p>
-
     <button onclick="solve()">Ответ: Главный холл</button>
   </div>
 </div>
@@ -91,30 +95,40 @@ html, body {
 <div id="panorama"></div>
 
 <script>
-// === 1. ЛОГИКА КВЕСТА (АВТО-ГАЛОЧКА) ===
-// ID должен совпадать с тем, что прописан в главном index.html в массиве buildings
-const locationId = 'hall'; 
+// ===================================================
+// 1. УЧЁТ ПОСЕЩЕНИЙ ХОЛЛА
+// ===================================================
+const visitKey = 'bsuir_hall_visits';
+let visits = parseInt(localStorage.getItem(visitKey) || '0', 10);
+visits++;
+localStorage.setItem(visitKey, visits);
+
+// ===================================================
+// 2. КВЕСТ (АВТОГАЛОЧКА)
+// ===================================================
+const locationId = 'hall';
 
 try {
   let progress = JSON.parse(localStorage.getItem('bsuir_quest_progress') || '{}');
   if (!progress[locationId]) {
     progress[locationId] = true;
     localStorage.setItem('bsuir_quest_progress', JSON.stringify(progress));
-    // Сигнал главной вкладке обновиться
     localStorage.setItem('bsuir_quest_update', Date.now());
   }
 } catch (e) {
-  console.error('Ошибка LocalStorage:', e);
+  console.error('LocalStorage error:', e);
 }
 
-// === 2. ПАНОРАМА ===
-let arrow = null;
+// ===================================================
+// 3. ПАНОРАМА
+// ===================================================
+let arrow1 = null;
+let arrow2 = null;
 
 pannellum.viewer('panorama', {
   type: 'cubemap',
   autoLoad: true,
 
-  // Убедитесь, что названия файлов совпадают с теми, что лежат в папке hall/
   cubeMap: [
     '1_Holl_Front.jpg',
     '1_Holl_Right.jpg',
@@ -125,53 +139,79 @@ pannellum.viewer('panorama', {
   ],
 
   hotSpots: [
+
+    // ---------- ПЕРВАЯ СТРЕЛКА ----------
     {
       pitch: 1.02,
       yaw: 131.96,
       type: 'custom',
       createTooltipFunc: function(div) {
-        arrow = div;
+        arrow1 = div;
         div.classList.add('custom-arrow');
-        // Скрываем стрелку, пока не решена загадка
         div.style.display = 'none';
 
         const img = document.createElement('img');
-        // ВАЖНО: Если стрелка лежит в корне, используйте ../arrow.png
-        // Если внутри папки hall, то просто arrow.png
-        img.src = 'arrow.png'; 
+        img.src = 'arrow.png';
         img.style.width = '100%';
         img.style.cursor = 'pointer';
-        
-        // Анимация наведения (опционально)
-        img.onmouseover = () => { img.style.transform = 'scale(1.1)'; };
-        img.onmouseout = () => { img.style.transform = 'scale(1.0)'; };
         img.style.transition = 'transform 0.2s';
 
-        // Переход на следующую локацию
+        img.onmouseover = () => img.style.transform = 'scale(1.1)';
+        img.onmouseout  = () => img.style.transform = 'scale(1)';
+
         img.onclick = () => {
           window.location.href = '../room502/index.html';
         };
 
         div.appendChild(img);
       }
+    },
+
+    // ---------- ВТОРАЯ СТРЕЛКА ----------
+    {
+      pitch: -2,
+      yaw: -45,
+      type: 'custom',
+      createTooltipFunc: function(div) {
+        arrow2 = div;
+        div.classList.add('custom-arrow');
+        div.style.display = 'none';
+
+        const img = document.createElement('img');
+        img.src = 'arrow.png';
+        img.style.width = '100%';
+        img.style.cursor = 'pointer';
+        img.style.transition = 'transform 0.2s';
+
+        img.onmouseover = () => img.style.transform = 'scale(1.1)';
+        img.onmouseout  = () => img.style.transform = 'scale(1)';
+
+        img.onclick = () => {
+          window.close();
+        };
+
+        div.appendChild(img);
+      }
     }
+
   ]
 });
 
-// === 3. РЕШЕНИЕ ЗАГАДКИ ===
+// ===================================================
+// 4. РЕШЕНИЕ ЗАГАДКИ
+// ===================================================
 function solve() {
-  const riddleBox = document.getElementById('riddle');
-  
-  // Просто скрываем, как в образце
-  riddleBox.style.display = 'none';
-  
-  // Показываем стрелку
-  if (arrow) {
-    arrow.style.display = 'block';
+  document.getElementById('riddle').style.display = 'none';
+
+  if (visits === 1 && arrow1) {
+    arrow1.style.display = 'block';
+  }
+
+  if (visits >= 2 && arrow2) {
+    arrow2.style.display = 'block';
   }
 }
 </script>
 
 </body>
 </html>
-
