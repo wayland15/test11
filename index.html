@@ -5,30 +5,133 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Квест-экскурсия — БГУИР</title>
   <style>
-    /* Тот же красивый стиль, что был раньше */
-    :root{--bg:#0b0f14;--card:#0f1720;--accent:#6ee7b7;--muted:#9aa4b2}
-    html,body{height:100%;margin:0;font-family:Inter, Roboto, sans-serif;background:linear-gradient(180deg,#061018 0%, #0b1220 100%);color:#e6eef6}
-    .app{display:flex;height:100vh;gap:18px;padding:18px;box-sizing:border-box}
-    .sidebar{width:320px;background:rgba(255,255,255,0.03);border-radius:14px;padding:18px;overflow:auto}
-    h1{font-size:18px;margin:0 0 12px}
-    .hint{font-size:13px;color:var(--muted);margin-top:6px}
-    .building{margin-bottom:24px}
-    .building-title{font-weight:700;color:var(--accent);margin-bottom:10px}
-    .tabs{display:flex;flex-direction:column;gap:10px}
-    .tab{background:rgba(255,255,255,0.02);padding:14px;border-radius:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-    .tab:hover{background:rgba(255,255,255,0.05)}
-    .tab button{background:transparent;border:1px solid rgba(255,255,255,0.1);padding:6px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .tab button:hover{border-color:var(--accent);color:#fff}
-    .tab.visited{background:rgba(110,231,183,0.1);border:1px solid rgba(110,231,183,0.2)}
-    .main{flex:1;display:flex;flex-direction:column;gap:12px}
-    .viewer{flex:1;background:var(--card);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .viewer img{max-width:100%;max-height:100%;object-fit:contain}
-    .controls{display:flex;gap:10px}
-    .btn{background:var(--accent);border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:bold;color:#000}
-    .btn.secondary{background:transparent;border:1px solid #444;color:#fff}
+    /* === СТИЛИ === */
+    :root {
+      --bg: #0b0f14;
+      --card: #161e29;
+      --accent: #6ee7b7;
+      --muted: #9aa4b2;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    html, body {
+      height: 100%; margin: 0;
+      font-family: 'Inter', Roboto, sans-serif;
+      background: linear-gradient(180deg, #061018 0%, #0b1220 100%);
+      color: #e6eef6;
+    }
+
+    .app { display: flex; height: 100vh; gap: 20px; padding: 20px; box-sizing: border-box; }
+    
+    /* Сайдбар */
+    .sidebar {
+      width: 340px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      overflow-y: auto;
+    }
+
+    h1 { font-size: 20px; margin: 0 0 8px; color: #fff; }
+    .hint { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+    /* Аккордеон (Группировка по корпусам) */
+    details {
+      margin-bottom: 8px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    summary {
+      padding: 12px 15px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+      user-select: none;
+      list-style: none; /* Скрываем стандартный треугольник */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    summary:hover { background: rgba(255,255,255,0.02); }
+    summary::after { content: '+'; font-size: 18px; color: var(--muted); }
+    details[open] summary::after { content: '−'; }
+    details[open] summary { border-bottom: 1px solid var(--border); }
+
+    /* Список локаций внутри корпуса */
+    .location-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: background 0.2s;
+    }
+    .tab:last-child { border-bottom: none; }
+    .tab:hover { background: rgba(255,255,255,0.05); }
+    .tab.active { background: rgba(110, 231, 183, 0.1); color: var(--accent); }
+
+    /* Кнопка галочки */
+    .check-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #555;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+    .check-btn:hover { border-color: var(--accent); color: #fff; }
+    .tab.visited .check-btn { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    /* Основная часть */
+    .main { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+    
+    .controls { display: flex; gap: 12px; align-items: center; background: var(--card); padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+    .btn { background: var(--accent); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; color: #0b1220; transition: 0.2s; }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn.secondary { background: transparent; border: 1px solid #555; color: #ccc; font-weight: 500; }
+    .btn.secondary:hover { border-color: #fff; color: #fff; }
+    
+    .viewer {
+      flex: 1;
+      background: #000;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .viewer img {
+      width: 100%; height: 100%; object-fit: cover;
+      opacity: 0.8; transition: opacity 0.5s;
+    }
+
     /* Модалка */
-    .modal-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:99}
-    .modal{background:#111;padding:30px;border-radius:15px;max-width:600px}
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      display: none; align-items: center; justify-content: center;
+      z-index: 100; backdrop-filter: blur(5px);
+    }
+    .modal { background: #1a2332; padding: 32px; border-radius: 16px; max-width: 500px; width: 100%; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .modal h2 { margin-top: 0; color: var(--accent); }
+    .modal p { line-height: 1.6; color: #d1d5db; }
   </style>
 </head>
 <body>
@@ -36,19 +139,23 @@
 <div class="app">
   <aside class="sidebar">
     <h1>БГУИР — VR Квест</h1>
-    <div class="hint">Выбирай локации, открывай 360° туры, разгадывай загадки!</div>
-    <hr style="opacity:0.1;margin:15px 0">
-    <div id="tabsContainer"></div>
+    <div class="hint">Исследуй корпуса, находи ответы!</div>
+    <div id="accordionContainer">
+      </div>
   </aside>
 
   <main class="main">
     <div class="controls">
-      <button id="openInNewTab" class="btn">Открыть 360° тур (Новое окно)</button>
-      <button id="resetBtn" class="btn secondary">Сброс</button>
-      <div style="margin-left:auto;color:#777" id="currentInfo"></div>
+      <div style="flex:1">
+        <div style="font-size:12px; color:var(--muted)">Текущая локация:</div>
+        <div id="currentTitle" style="font-weight:bold; font-size:16px;">Не выбрано</div>
+      </div>
+      <button id="openInNewTab" class="btn">Открыть 360° тур</button>
+      <button id="resetBtn" class="btn secondary">Сброс прогресса</button>
     </div>
+    
     <div class="viewer" id="viewer">
-      <div style="color:#555">Выберите локацию слева</div>
+      <div style="color:#555">Выберите локацию в меню слева</div>
     </div>
   </main>
 </div>
@@ -57,96 +164,176 @@
   <div class="modal">
     <h2 id="modalTitle">Загадка</h2>
     <p id="modalText"></p>
-    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px">
-      <button class="btn" id="solveBtn">Показать ответ</button>
-      <button class="btn secondary" id="closeModal">Закрыть</button>
+    <div style="margin-top:24px; display:flex; justify-content:flex-end; gap:12px">
+      <button class="btn secondary" id="solveBtn">Показать ответ</button>
+      <button class="btn" id="closeModal">Закрыть</button>
     </div>
   </div>
 </div>
 
 <script>
-  // === НАСТРОЙКИ ЛОКАЦИЙ ===
-  // tourUrl: путь к твоему HTML файлу внутри папки
-  // photoUrl: путь к картинке для предпросмотра (можешь взять одну из панорамы, например Front)
-  const places = [
-    { 
-      id: 'hall', 
-      title: 'Главный холл', 
-      building: '2', 
-      tourUrl: 'hall/index.html',  // <-- ВАЖНО: Путь к твоему файлу панорамы
-      photoUrl: 'hall/1_Holl_Front.jpg', // Картинка для превью здесь
-      riddle: 'Зеленый пол, колонны в ряд. Куда студенты все спешат?', 
-      answer: 'Главный вход / Холл' 
-    },
-    // Добавь остальные
-    { 
-      id: 'library', 
-      title: 'Библиотека', 
-      building: '2', 
-      tourUrl: 'library/index.html', 
-      photoUrl: 'library/2_Lib_Front.jpg',
-      riddle: 'Тишина должна быть в библиотеке...', 
-      answer: 'Чшшш!' 
-    }
+  // === СПИСОК КОРПУСОВ (Для группировки) ===
+  const buildingOrder = [
+    "Учебный корпус №2",
+    "Учебный корпус №3",
+    "Учебный корпус №5",
+    "Учебный корпус №7-8",
+    "Общежитие №1",
+    "СОК «Браславские озера»"
   ];
 
-  // Основная логика (та же самая, только упрощенная)
-  const tabsContainer = document.getElementById('tabsContainer');
-  const viewer = document.getElementById('viewer');
-  const openBtn = document.getElementById('openInNewTab');
-  let currentPlace = null;
-  
-  let visited = JSON.parse(localStorage.getItem('bsuir_quest') || '{}');
+  // === ДАННЫЕ ЛОКАЦИЙ ===
+  // id: используется для имени картинки в папке place/ (например: place/hall.jpg)
+  // tourUrl: путь к папке с туром
+  const places = [
+    // Корпус 2
+    { id: 'hall', title: 'Главный холл', building: 'Учебный корпус №2', tourUrl: 'hall/index.html', riddle: 'Зеленый пол, колонны в ряд...', answer: 'Холл' },
+    { id: 'library', title: 'Библиотека', building: 'Учебный корпус №2', tourUrl: 'library/index.html', riddle: 'Где живут книги?', answer: 'Библиотека' },
+    
+    // Корпус 3 (примеры)
+    { id: 'k3_hall', title: 'Вестибюль 3к', building: 'Учебный корпус №3', tourUrl: 'k3/hall/index.html', riddle: 'Загадка про 3 корпус...', answer: 'Ответ' },
+    
+    // Корпус 5 (примеры)
+    { id: 'k5_lab', title: 'Лаборатория робототехники', building: 'Учебный корпус №5', tourUrl: 'k5/lab/index.html', riddle: 'Железные руки...', answer: 'Робот' },
 
-  function render() {
-    tabsContainer.innerHTML = '';
-    places.forEach(p => {
-      const el = document.createElement('div');
-      el.className = 'tab' + (visited[p.id] ? ' visited' : '');
-      el.innerHTML = `<span>${p.title}</span> <button class="checkBtn">✅</button>`;
+    // Корпус 7-8
+    { id: 'k7_buffet', title: 'Буфет', building: 'Учебный корпус №7-8', tourUrl: 'k7/food/index.html', riddle: 'Самое вкусное место...', answer: 'Буфет' },
+
+    // Общежитие
+    { id: 'hostel1_gym', title: 'Спортзал', building: 'Общежитие №1', tourUrl: 'hostel1/gym/index.html', riddle: 'Сила и дух...', answer: 'Зал' },
+
+    // Браславы
+    { id: 'braslav_beach', title: 'Пляж', building: 'СОК «Браславские озера»', tourUrl: 'braslav/index.html', riddle: 'Вода и песок...', answer: 'Пляж' },
+  ];
+
+  // === ЛОГИКА ===
+  const accordionContainer = document.getElementById('accordionContainer');
+  const viewer = document.getElementById('viewer');
+  const currentTitleEl = document.getElementById('currentTitle');
+  
+  let currentPlace = null;
+  let visited = JSON.parse(localStorage.getItem('bsuir_quest_v2') || '{}');
+
+  function renderSidebar() {
+    accordionContainer.innerHTML = '';
+
+    buildingOrder.forEach(bName => {
+      // 1. Фильтруем локации для текущего корпуса
+      const groupPlaces = places.filter(p => p.building === bName);
       
-      el.onclick = (e) => {
-        if(e.target.className === 'checkBtn') {
-           markVisited(p); 
-        } else {
-           selectPlace(p);
-        }
-      };
-      tabsContainer.appendChild(el);
+      // Если в корпусе нет локаций, можно пропустить или показать пустым. 
+      // Покажем пустым, чтобы список был полным визуально.
+      
+      const details = document.createElement('details');
+      // Если хотим, чтобы первый был открыт по умолчанию:
+      if(bName === "Учебный корпус №2") details.open = true; 
+
+      const summary = document.createElement('summary');
+      summary.textContent = bName; // Название корпуса
+      
+      const list = document.createElement('div');
+      list.className = 'location-list';
+
+      if (groupPlaces.length === 0) {
+        list.innerHTML = '<div style="padding:10px; font-size:12px; color:#555">Нет доступных туров</div>';
+      } else {
+        groupPlaces.forEach(p => {
+          const row = document.createElement('div');
+          // Добавляем класс active, если это текущая выбранная локация
+          const isActive = currentPlace && currentPlace.id === p.id;
+          row.className = 'tab' + (visited[p.id] ? ' visited' : '') + (isActive ? ' active' : '');
+          
+          row.innerHTML = `
+            <span>${p.title}</span>
+            <button class="check-btn" title="Отметить как пройденное">${visited[p.id] ? '✔' : ''}</button>
+          `;
+
+          // Клик по строке - выбор места
+          row.onclick = (e) => {
+            // Если кликнули именно по кнопке чекбокса
+            if(e.target.closest('.check-btn')) {
+              e.stopPropagation();
+              toggleVisited(p);
+            } else {
+              selectPlace(p);
+            }
+          };
+          list.appendChild(row);
+        });
+      }
+
+      details.appendChild(summary);
+      details.appendChild(list);
+      accordionContainer.appendChild(details);
     });
   }
 
   function selectPlace(p) {
     currentPlace = p;
-    document.getElementById('currentInfo').textContent = p.title;
-    // Показываем превью
-    viewer.innerHTML = `<img src="${p.photoUrl}" onerror="this.src='https://via.placeholder.com/600x400?text=Нет+фото'">`;
+    currentTitleEl.textContent = `${p.building} — ${p.title}`;
+    
+    // Обновляем картинку. Путь: place/ID.jpg
+    viewer.innerHTML = `<img src="place/${p.id}.jpg" alt="${p.title}" onerror="this.src='https://via.placeholder.com/800x600/161e29/6ee7b7?text=Нет+изображения+(place/${p.id}.jpg)'">`;
+    
+    // Перерисовываем сайдбар, чтобы подсветить активный элемент
+    renderSidebar();
   }
 
-  // ОТКРЫТИЕ ТУРА
-  openBtn.onclick = () => {
-    if(!currentPlace) return alert('Выберите место!');
-    // Просто открываем ссылку на твой html файл в новой вкладке
+  function toggleVisited(p) {
+    if (visited[p.id]) {
+      // Если уже посещено — просто снимаем галочку (опционально)
+      delete visited[p.id];
+    } else {
+      // Если не посещено — отмечаем и показываем загадку
+      visited[p.id] = true;
+      showRiddle(p);
+    }
+    localStorage.setItem('bsuir_quest_v2', JSON.stringify(visited));
+    renderSidebar();
+  }
+
+  // === ОТКРЫТИЕ ТУРА ===
+  document.getElementById('openInNewTab').onclick = () => {
+    if(!currentPlace) return alert('Сначала выберите локацию из списка слева!');
     window.open(currentPlace.tourUrl, '_blank');
   };
 
-  function markVisited(p) {
-    visited[p.id] = true;
-    localStorage.setItem('bsuir_quest', JSON.stringify(visited));
-    render();
-    // Показать загадку
-    document.getElementById('modalTitle').textContent = p.title;
-    document.getElementById('modalText').textContent = p.riddle;
-    document.getElementById('solveBtn').onclick = () => {
-       document.getElementById('modalText').innerHTML = p.riddle + '<br><br><b>' + p.answer + '</b>';
+  // === СБРОС ===
+  document.getElementById('resetBtn').onclick = () => {
+    if(confirm('Сбросить весь прогресс прохождения?')) {
+      localStorage.removeItem('bsuir_quest_v2');
+      visited = {};
+      currentPlace = null;
+      currentTitleEl.textContent = 'Не выбрано';
+      viewer.innerHTML = '<div style="color:#555">Выберите локацию</div>';
+      renderSidebar();
+    }
+  };
+
+  // === МОДАЛКА ЗАГАДОК ===
+  const modal = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+  const solveBtn = document.getElementById('solveBtn');
+
+  function showRiddle(p) {
+    modalTitle.textContent = p.title;
+    modalText.textContent = p.riddle || 'Загадка для этой локации еще не придумана.';
+    
+    // Логика кнопки "Показать ответ"
+    solveBtn.onclick = () => {
+       modalText.innerHTML = `${p.riddle}<br><br><strong style="color:var(--accent)">Ответ: ${p.answer || '—'}</strong>`;
     };
-    document.getElementById('modalBackdrop').style.display = 'flex';
+    
+    modal.style.display = 'flex';
   }
 
-  document.getElementById('closeModal').onclick = () => document.getElementById('modalBackdrop').style.display = 'none';
-  document.getElementById('resetBtn').onclick = () => { localStorage.clear(); visited={}; render(); };
+  document.getElementById('closeModal').onclick = () => {
+    modal.style.display = 'none';
+  };
 
-  render();
+  // Инициализация
+  renderSidebar();
 </script>
 </body>
 </html>
