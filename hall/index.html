@@ -189,7 +189,12 @@ function solve() {
   riddle.style.opacity = '0';
   setTimeout(() => riddle.style.display = 'none', 300);
 
-  if (nextArrow) nextArrow.style.display = 'block';
+  if (nextArrow) {
+    nextArrow.style.display = 'block';
+    console.log('Стрелка показана');
+  } else {
+    console.error('nextArrow = null');
+  }
 }
 
 window.viewer = pannellum.viewer('panorama', {
@@ -215,21 +220,9 @@ window.viewer = pannellum.viewer('panorama', {
     }
   ]
 });
-</script>
-
-<script>
-const locationId = 'hall';
-
-let progress = JSON.parse(localStorage.getItem('bsuir_quest_progress') || '{}');
-
-if (!progress[locationId]) {
-  progress[locationId] = true;
-  localStorage.setItem('bsuir_quest_progress', JSON.stringify(progress));
-  localStorage.setItem('bsuir_quest_update', Date.now());
-}
-</script>
 
 </body>
 </html>
+
 
 
